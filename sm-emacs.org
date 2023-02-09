@@ -63,7 +63,7 @@ Use the gothic font for SM's UI for a much faster screen refresh
 :ID:       5f96c370-eb26-4117-a7d8-43793e465c9d
 :END:
 
-By identifying and naming different SuperMemo window buffers, we can have a reliable way to target those buffers with text streams. Specifically, we can target a buffer with a simulated keypress, affording us a kind of poor-man's API by way of scripting window movement and key-chords in an orchistrated way.
+By identifying and naming different SuperMemo window buffers, we can have a reliable way to target those buffers with text streams. Specifically, we can target a buffer with a simulated key-press, affording us a kind of poor-man's API by way of scripting window movement and key-chords in an orchestrated way.
 
 ** Capturing buffers
 :PROPERTIES:
@@ -71,7 +71,7 @@ By identifying and naming different SuperMemo window buffers, we can have a reli
 :ID:       8cf89b9a-bdb4-41a4-a3a9-4343be5c0ee6
 :END:
 
-A quirk of using SM under Wine is that a virtual desktop steals management of SM's windows and X naming scheme. In order to use text-streaming and window/buffer management with ~EXWM~ we want to be able to target named instances of the windows which will means we'll need to capture the buffer via =WM_TITLE= of individual windows.
+A quirk of using SM under Wine is that a virtual desktop steals management of SM's windows and X naming scheme. In order to use text-streaming and window/buffer management with ~EXWM~ we want to be able to target named instances of the windows which means we'll need to capture the buffer via the =WM_TITLE= of the respective x-windows.
 
 We want to capture the following buffer titles with a regex so that we can move:
 a. The Knowledge tree to the left of the screen.
@@ -109,7 +109,8 @@ We can test if our regex captures a given buffer:
 
 We'll start with the outlier first as its the most important window. Normally, SuperMemo will start with the first scheduled item of the day loaded into the elements window. The element name bleeds into the =WM_TITLE= variable and since we can't predict which element would be presented first on any given day, we will have to use a work around to get a stable title.
 
-The following makes use of Supermemo's ability to set a constant element via the bla bla menu. While this was originally intended to display quotes or the like it works nicely for us as the same text will be shown via =WM_TITLE= and by extension by in the =exwm-title= variable.
+The following makes use of Supermemo's ability to set a default element via the =Toolkit->Options= menu, and clicking the =Access= tab. While this was originally intended to display quotes or the like at startup, it works nicely for us as the text of the element will become part of the =WM_TITLE= and so by extension we get the same =exwm-title= variable each time SM is started.
+
 Besides, Emacs can be rigged to have this kind of functionality at startup and perform it even better.
 
 Here I use =home= as the only text in the element body, but you can use whatever you like. I've written the hooks in such a way that the buffer-name will remain constant even after progressing past this initial home element.
