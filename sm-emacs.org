@@ -57,7 +57,7 @@ Use the gothic font for SM's UI for a much faster screen refresh
 
 * Overview
 
-* Setup SM window management
+* Window management
 :PROPERTIES:
 :CREATED:  [2020-10-09 Fri 18:15]
 :ID:       5f96c370-eb26-4117-a7d8-43793e465c9d
@@ -115,9 +115,17 @@ Besides, Emacs can be rigged to have this kind of functionality at startup and p
 
 Here I use =home= as the only text in the element body, but you can use whatever you like. I've written the hooks in such a way that the buffer-name will remain constant even after progressing past this initial home element.
 
+#+begin_src elisp :noweb-ref sm-exwm-customisation
+(defcustom sm-emacs-default-element-title "home"
+  "Customisable default element body text to regex"
+  :type 'string
+  :group 'sm-emacs)
+
+#+end_src
+
 #+name: element-window-rx
 #+begin_src elisp
-(rx bol "home" eol)
+(rx bol (eval sm-emacs-default-element-title) eol)
 #+end_src
 
 #+RESULTS: element-window-rx
