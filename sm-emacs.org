@@ -131,19 +131,40 @@ Here I use =home= as the only text in the element body, but you can use whatever
 #+RESULTS: element-window-rx
 : ^home$
 
+This next window is the [[http://super-memory.com/help/Element_data][Element data window]] of Supermemo, which displays variously priority, position, schedule, repetition and statistical data for the currently viewed element.
+
+Note: the =Warrior layout= is assumed going forward, and the default configuration of this package in terms of layout is somewhat prescriptive.
+
 #+NAME: element-data-rx
 #+begin_src elisp
 (rx
  (|
-  (seq (or "Topic" "Element") space "#" (one-or-more digit) ":")
+  (seq (or "Topic" "Element" "Item") space "#" (one-or-more digit) ":")
   (seq "Element data")))
 #+end_src
 
-Next capture the knowledge tree:
-"X:sm18.exe/neuron"
+#+RESULTS: element-data-rx
+: \(?:Element\|Item\|Topic\)[[:space:]]#[[:digit:]]+:\|Element data
+
+Next we capture the knowledge tree. The =WM_TITLE= of this window is reflective of the name of /your root element/. I can't predict what it might be, and it is probably best to leave the root element alone in most situations, so please set the following variable:
+
+#+begin_src elisp :noweb-ref sm-exwm-customisation
+(defcustom sm-emacs-root-element-title "neuron"
+  "Customisable default element body text to regex"
+  :type 'string
+  :group 'sm-emacs)
+
+#+end_src
+
+For me, this is =neuron=, which I set with the following in my config:
+
+#+begin_src elisp
+(setq sm-emacs-root-element-title "neuron")
+#+end_src
+
 #+NAME: knowledge-tree-rx
 #+begin_src elisp
-(rx bol "neuron" eol)
+(rx bol (eval sm-emacs-root-element-title) eol)
 #+end_src
 
 #+RESULTS: knowledge-tree-rx
