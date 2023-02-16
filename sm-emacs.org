@@ -206,7 +206,7 @@ The below now works by hooking into the stable =exwm-instance-name=
 #+begin_src elisp :noweb yes :noweb-ref exwm-class-hook
 (add-hook 'exwm-update-class-hook
           (defun rename-sm-class ()
-            "Rename sm18.exe class"
+            "Rename class to sm18.exe via `exwm-instance-name'."
             (when (string-match (rx "sm18.exe") exwm-instance-name)
               (setq exwm-class-name exwm-instance-name))))
 
@@ -227,22 +227,33 @@ The below now works by hooking into the stable =exwm-instance-name=
 
 A cleaner approach than multiple ~when~ statements is to store the target =buffer-name= and =exwm-title= regex's as key . value pairs, respectively [fn:1].
 
+*** Core windows
+:PROPERTIES:
+:CREATED:  [2023-02-16 Thu 15:49]
+:ID:       017de45f-d2a3-47f7-b6fc-894f335830fd
+:END:
 I should probably be writing this as =cons= and not using backquotes.
-#+begin_src elisp :noweb yes :noweb-ref sm-window hooks
+#+begin_src elisp :noweb yes :noweb-ref sm-window-alists
 (setq sm-exwm-core-buffer-alist
       (list `("sm-element-window" . ,<<element-window-rx>>)
             `("sm-knowledge-tree" . ,<<knowledge-tree-rx>>)
-            '("sm-template-registry" . "Template Registry")
             `("sm-element-data" . ,
-               <<element-data-rx>>)
+              <<element-data-rx>>)
             `("sm-frame" . ,<<empty-sm-frame-rx>>)))
 
 #+end_src
 
+This is an empty buffer
+#+begin_src elisp :noweb yes :noweb-ref sm-window hooks
+(setq sm-exwm-core-frame-alist (list '(`("sm-frame" . ,<<empty-sm-frame-rx>>))))
+
+#+end_src
+
+Maybe this hook is being rerun?
 #+begin_src elisp :noweb yes :noweb-ref sm-window hooks
 (add-hook 'exwm-update-title-hook
-          (defun sm-core-window-title-hook ()
-            "Manage the core names"
+          (defun sm-exwm-core-window-title-hook ()
+            "Iterate over floating alist and rename `exwm-title' to key."
             (cl-loop for (key . value) in sm-exwm-core-buffer-alist
                      if (string-match value exwm-title)
                      do (exwm-workspace-rename-buffer key)
@@ -251,6 +262,13 @@ I should probably be writing this as =cons= and not using backquotes.
 #+end_src
 
 #+begin_src elisp :noweb yes :noweb-ref sm-window hooks
+*** Floating windows
+:PROPERTIES:
+:CREATED:  [2023-02-16 Thu 15:49]
+:ID:       8a5cae8b-16cf-4647-b1c6-94c6fc9cc863
+:END:
+
+#+begin_src elisp :noweb yes :noweb-ref sm-window-alists
 (setq sm-exwm-floating-buffer-alist
       '(("sm-algo-choice" . "Choices")
         ("sm-backup-copy" . "Copying")
@@ -270,7 +288,7 @@ I should probably be writing this as =cons= and not using backquotes.
         ("sm-integrity-check" . "Checking the integrity of the collection")
         ("sm-edit-reference" . "Editing references")
         ("sm-interval" . "Interval")
-        ("sm-leech-window" . "Leech")
+        ("sm-leech-window" . "Leech Alert\!")
         ("sm-mercy-parameters" . "^Mercy")
         ("sm-memory-status" . "Memory status for Item")
         ("sm-modify-priority" . "Element Priority")
@@ -281,7 +299,7 @@ I should probably be writing this as =cons= and not using backquotes.
         ("sm-options-window" . "Options")
         ("sm-outstanding" . "Outstanding")
         ("sm-property-window" . "\%sのプロパティ")
-        ("sm-question-window" . "^Question$")
+        ("sm-question-window" . "^Question")
         ("sm-repair-options" . "Repair Options")
         ("sm-schedule-plan" . "Schedule plan")
         ("sm-shift-input" . "Input number")
@@ -301,8 +319,8 @@ I should probably be writing this as =cons= and not using backquotes.
 
 #+begin_src elisp :noweb yes :noweb-ref sm-window hooks
 (add-hook 'exwm-update-title-hook
-          (defun sm-window-title-hook ()
-            "Iterate over naming alist and rename `exwm-title' to key"
+          (defun sm-exwm-floating-window-title-hook ()
+            "Iterate over floating alist and rename `exwm-title' to key."
             (cl-loop for (key . value) in sm-exwm-floating-buffer-alist
                      if (string-match (regexp-quote value) exwm-title)
                      do (exwm-workspace-rename-buffer key)
