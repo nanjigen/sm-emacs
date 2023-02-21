@@ -274,7 +274,25 @@ Then we name our Supermemo windows by iterating out the desired names from the c
 
 #+end_src
 
-#+begin_src elisp :noweb yes :noweb-ref sm-window hooks
+**** NEXT Status bar
+:PROPERTIES:
+:CREATED:  [2023-02-17 Fri 16:59]
+:ID:       2a9d0aef-3dcd-406f-ac27-77311fc85f99
+:TRIGGER:  chain-find-next(NEXT,from-current,priority-up,effort-down)
+:END:
+
+Noticeably missing from the core window list is the [[https://help.supermemo.org/wiki/Status_bar][status bar]]. Due to some limitations in EXWM (and my own knowledge), its size and transience make it difficult to place satisfactorily below the statistics window.
+It's =exwm-title= variable comes up as =nil=, so we'll have to test =exwm-title= against an empty/nil string?
+
+#+begin_src elisp :noweb yes :noweb-ref no
+(add-hook 'exwm-update-title-hook
+          (defun sm-status-bar-title-hook ()
+            "Manage the status bar name"
+            (when (= exwm-title nil) ;; FIXME this doesn't work
+              (exwm-workspace-rename-buffer "sm-status-bar")
+              (setq exwm-title "sm-status-bar"))))
+#+end_src
+
 *** Floating windows
 :PROPERTIES:
 :CREATED:  [2023-02-16 Thu 15:49]
