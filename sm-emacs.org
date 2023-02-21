@@ -217,9 +217,7 @@ The below now works by hooking into the stable =exwm-instance-name=
 
 #+end_src
 
-** TODO get-buffer-create for sm windows?
-** TODO don't resize sm buffers
-** Regex and buffer alists
+** =(regex . buffer)= alists and naming hooks
 :PROPERTIES:
 :CREATED:  [2021-10-02 Sat 11:25]
 :ID:       fe2492e4-5d72-481b-8c9b-2b8358055ea7
@@ -227,12 +225,22 @@ The below now works by hooking into the stable =exwm-instance-name=
 
 A cleaner approach than multiple ~when~ statements is to store the target =buffer-name= and =exwm-title= regex's as key . value pairs, respectively [fn:1].
 
+The structure of the following sections features the =alist= and the naming function alongside each other.
+
 *** Core windows
 :PROPERTIES:
 :CREATED:  [2023-02-16 Thu 15:49]
 :ID:       017de45f-d2a3-47f7-b6fc-894f335830fd
 :END:
-I should probably be writing this as =cons= and not using backquotes.
+
+These windows are those most Supermemo users are aware of and are commonly associated with the "warrior" layout, presenting 3 main windows. The main window showing the current element, the [[https://help.supermemo.org/wiki/Element_window][element window]], the element data window, showing data related to the current element, and the knowledge tree.
+
+**** Core window alists
+:PROPERTIES:
+:CREATED:  [2023-02-17 Fri 16:49]
+:ID:       af120141-2190-40de-9101-4cdda85236ae
+:END:
+I should probably be writing this as =cons= and not using backquotes. Alternatively maybe I can use =(regex-quote)=.
 #+begin_src elisp :noweb yes :noweb-ref sm-window-alists
 (setq sm-exwm-core-buffer-alist
       (list `("sm-element-window" . ,<<element-window-rx>>)
@@ -249,11 +257,16 @@ This is an empty buffer
 
 #+end_src
 
-Maybe this hook is being rerun?
+**** Core naming hook
+:PROPERTIES:
+:CREATED:  [2023-02-17 Fri 17:11]
+:ID:       9603f6d8-18f1-473f-a93b-b8e4bebb8970
+:END:
+Then we name our Supermemo windows by iterating out the desired names from the corresponding regex alists.
 #+begin_src elisp :noweb yes :noweb-ref sm-window hooks
 (add-hook 'exwm-update-title-hook
           (defun sm-exwm-core-window-title-hook ()
-            "Iterate over floating alist and rename `exwm-title' to key."
+            "Iterate over core alist and rename `exwm-title' to key."
             (cl-loop for (key . value) in sm-exwm-core-buffer-alist
                      if (string-match value exwm-title)
                      do (exwm-workspace-rename-buffer key)
