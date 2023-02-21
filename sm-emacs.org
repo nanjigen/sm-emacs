@@ -299,6 +299,16 @@ It's =exwm-title= variable comes up as =nil=, so we'll have to test =exwm-title=
 :ID:       8a5cae8b-16cf-4647-b1c6-94c6fc9cc863
 :END:
 
+**** floating window alist
+:PROPERTIES:
+:CREATED:  [2023-02-21 Tue 15:26]
+:ID:       c0710ccc-602a-4223-b40c-349f4104ef15
+:END:
+
+The 'floating windows' are made up of mostly transient windows, often used for confirming an action or making a selection of a subset or registry.
+
+Due to the rather egregious frame redraws that occur when a core (tiled) window is replaced or resized, I have chosen to make these windows floating. This prevents, say, the element window being replaced by another tiled window and greatly speeds up the general operation of Supermemo as we aren't waiting for visible redraws to complete. Also, it allows us to keep context, as we can often still see some of all the windows behind the floating one, informing our decisions regarding the prompt before us.
+
 #+begin_src elisp :noweb yes :noweb-ref sm-window-alists
 (setq sm-exwm-floating-buffer-alist
       '(("sm-algo-choice" . "Choices")
@@ -330,7 +340,7 @@ It's =exwm-title= variable comes up as =nil=, so we'll have to test =exwm-title=
         ("sm-options-window" . "Options")
         ("sm-outstanding" . "Outstanding")
         ("sm-property-window" . "\%sのプロパティ")
-        ("sm-question-window" . "^Question")
+        ("sm-question-window" . "Question")
         ("sm-repair-options" . "Repair Options")
         ("sm-schedule-plan" . "Schedule plan")
         ("sm-shift-input" . "Input number")
@@ -346,7 +356,13 @@ It's =exwm-title= variable comes up as =nil=, so we'll have to test =exwm-title=
 
 #+end_src
 
-** TODO write a function to write out names of SM windows not in alist
+**** Floating naming hook
+:PROPERTIES:
+:CREATED:  [2023-02-21 Tue 15:29]
+:ID:       df122f72-5633-4826-a1de-bee1b259b82b
+:END:
+
+As with the =core-window-title-hook=, we iterate via a ~cl-loop~. However you'll notice below an =exwm-manage-finish-hook=.
 
 #+begin_src elisp :noweb yes :noweb-ref sm-window hooks
 (add-hook 'exwm-update-title-hook
@@ -355,7 +371,35 @@ It's =exwm-title= variable comes up as =nil=, so we'll have to test =exwm-title=
             (cl-loop for (key . value) in sm-exwm-floating-buffer-alist
                      if (string-match (regexp-quote value) exwm-title)
                      do (exwm-workspace-rename-buffer key)
-                        (setq exwm-title key))))
+                     (setq exwm-title key)
+                     ;; (exwm-floating--set-floating (exwm--buffer->id (get-buffer key))) ;; FIXME doesn't work
+                     )))
+
+#+end_src
+
+This hook runs after ~exwm~ manages the =sm18.exe= class and sets floating for the floating window set each time a new window is spawned in SM. This is due to an issue related to managing the ~sm-element-window~, discussed later on:
+
+#+begin_src elisp :noweb yes :noweb-ref sm-window hooks
+(add-hook 'exwm-manage-finish-hook
+          (defun sm-exwm-set-floating-window-hook ()
+            "Iterate over floating alist and make `exwm-title' floating"
+            (cl-loop for (key . value) in sm-exwm-floating-buffer-alist
+                     if (string= exwm-title key)
+                     do (exwm-floating--set-floating (exwm--buffer->id (get-buffer key))))))
+#+end_src
+
+A test:
+#+begin_src elisp
+(add-hook 'exwm-manage-finish-hook
+          (lambda ()
+            (cl-loop for (key . value) in sm-exwm-core-buffer-alist
+                     if `((string= (current-buffer) ,key))
+                     if  exwm--floating-frame
+                     do (with-current-buffer key
+                          (exwm-floating--unset-floating exwm--id)))))
+#+end_src
+
+For some reference about the above functions see issue [[https://github.com/ch11ng/exwm/issues/516][#516]].
 
 #+end_src
 
