@@ -311,7 +311,8 @@ Due to the rather egregious frame redraws that occur when a core (tiled) window 
 
 #+begin_src elisp :noweb yes :noweb-ref sm-window-alists
 (setq sm-exwm-floating-buffer-alist
-      '(("sm-algo-choice" . "Choices")
+      '(("sm-ancestors" . "Ancestors")
+        ("sm-choice-window" . "Choices")
         ("sm-backup-copy" . "Copying")
         ("sm-background" . "Back")
         ("sm-commander" . "SuperMemo Commander")
